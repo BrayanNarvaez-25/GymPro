@@ -12,7 +12,16 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Drawer" component={DrawerNavigator} />
-        <Stack.Screen name="ChestDetailScreen" component={ChestDetailScreen} options={{ headerShown: true, title: 'Detalle' }} />
+        <Stack.Screen
+          name="ChestDetailScreen"
+          component={ChestDetailScreen}
+          options={{
+            headerShown: true,
+            title: 'Detalle',
+            headerStyle: { backgroundColor: '#000' },
+            headerTintColor: '#00FF41',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
