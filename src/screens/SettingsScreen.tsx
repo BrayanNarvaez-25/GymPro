@@ -1,21 +1,15 @@
-import {Text, Button} from 'react-native';
-import {StyleSheet} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 
-export default function HomeScreen({navigation}: any){
-    return(
-        <SafeAreaView>
-            <Text style={styles.title}> Configuración</Text>
-            <Button
-                title='Ver Configuración'
-                onPress= {()=> navigation.navigate('Detail')}
-            />
-        </SafeAreaView>
-    )
+export default function SettingsScreen() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.text}>Configuración</Text>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    title: {
-        justifyContent: 'center',
-    }
-})
+  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
+  text: { color: '#00FF41', fontSize: 22, fontWeight: 'bold' },
+});

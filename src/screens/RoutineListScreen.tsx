@@ -1,21 +1,27 @@
-import {Text, Button} from 'react-native';
-import {StyleSheet} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-export default function HomeScreen({navigation}: any){
-    return(
-        <SafeAreaView>
-            <Text style={styles.title}> Rutinas</Text>
-            <Button
-                title='Ver lista de Rutinas'
-                onPress= {()=> navigation.navigate('Detail')}
-            />
-        </SafeAreaView>
-    )
+export default function RoutineListScreen() {
+  const navigation = useNavigation<any>();
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.text}>Rutinas</Text>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('ChestDetailScreen')}
+      >
+        <Text style={styles.buttonText}>Ver Rutina de Pecho</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    title: {
-        justifyContent: 'center',
-    }
-})
+  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
+  text: { color: '#00FF41', fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  button: { backgroundColor: '#00FF41', padding: 12, borderRadius: 6 },
+  buttonText: { color: '#000', fontWeight: 'bold' },
+});
