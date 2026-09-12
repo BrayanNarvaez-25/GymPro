@@ -1,4 +1,4 @@
-import { Text, StyleSheet,TouchableOpacity } from 'react-native';
+import { Text, StyleSheet,TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
@@ -14,6 +14,13 @@ export default function RoutineListScreen() {
         onPress={() => navigation.navigate('ChestDetailScreen')}
       >
         <Text style={styles.buttonText}>Ver Rutina de Pecho</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => Alert.alert("Emezando Rutina")}
+      >
+        <Text style={styles.buttonText}>Empezar Rutina</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

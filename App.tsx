@@ -17,7 +17,7 @@ export default function App() {
           component={ChestDetailScreen}
           options={{
             headerShown: true,
-            title: 'Detalle',
+            title: 'Brayan Narváez',
             headerStyle: { backgroundColor: '#000' },
             headerTintColor: '#00FF41',
           }}
