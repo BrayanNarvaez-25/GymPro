@@ -4,8 +4,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoutines, Routine } from '../context/RoutineContext';
+import { colores, tipografia, radios, espaciado } from '../theme/tema';
 
 const GRUPOS_FILTRO = ['Todos', 'Pecho', 'Espalda', 'Piernas', 'Brazos', 'Hombros', 'Abdomen'];
+
+const ICONO_POR_GRUPO: Record<string, keyof typeof Ionicons.glyphMap> = {
+  Pecho: 'body-outline',
+  Espalda: 'body-outline',
+  Piernas: 'walk-outline',
+  Brazos: 'barbell-outline',
+  Hombros: 'body-outline',
+  Abdomen: 'body-outline',
+};
 
 export default function RoutineListScreen() {
   const navigation = useNavigation<any>();
@@ -18,62 +28,79 @@ export default function RoutineListScreen() {
   }, [routines, filtroActivo]);
 
   const renderItem = ({ item }: { item: Routine }) => (
-    <View style={[styles.card, item.featured && styles.cardDestacada]}>
-      <View style={styles.cardInfo}>
-        <Text style={styles.cardName}>{item.name}</Text>
-        <Text style={styles.cardSubtitle}>
-          {item.muscleGroup} • {item.duration} mins
+    <View style={styles.tarjeta}>
+      <View style={[styles.franja, item.featured && styles.franjaDestacada]} />
+
+      <View style={styles.tarjetaContenido}>
+        <View style={styles.tarjetaEncabezado}>
+          <Ionicons
+            name={ICONO_POR_GRUPO[item.muscleGroup] ?? 'barbell-outline'}
+            size={18}
+            color={colores.textoSecundario}
+          />
+          <Text style={styles.nombreRutina}>{item.name}</Text>
+          {item.featured && (
+            <View style={styles.etiquetaDestacada}>
+              <Ionicons name="star" size={12} color={colores.fondo} />
+              <Text style={styles.etiquetaDestacadaTexto}>DESTACADA</Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.detalleRutina}>
+          {item.muscleGroup} · {item.duration} min
         </Text>
       </View>
 
-      <View style={styles.cardActions}>
+      <View style={styles.acciones}>
         <TouchableOpacity
-          style={styles.iconButton}
+          style={styles.botonAccion}
           onPress={() => navigation.navigate('RoutineDetailScreen', { id: item.id })}
         >
-          <Ionicons name="eye-outline" size={22} color="#00FF41" />
+          <Ionicons name="eye-outline" size={20} color={colores.textoSecundario} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.iconButton}
+          style={styles.botonAccion}
           onPress={() => marcarComoDestacada(item.id)}
         >
           <Ionicons
             name={item.featured ? 'star' : 'star-outline'}
-            size={22}
-            color="#FFD400"
+            size={20}
+            color={colores.destacado}
           />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.iconButton}
+          style={styles.botonAccion}
           onPress={() => navigation.navigate('AddRoutineScreen', { id: item.id })}
         >
-          <Ionicons name="pencil-outline" size={22} color="#FFD400" />
+          <Ionicons name="pencil-outline" size={20} color={colores.primario} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.iconButton}
+          style={styles.botonAccion}
           onPress={() => deleteRoutine(item.id)}
         >
-          <Ionicons name="trash-outline" size={22} color="#FF3B3B" />
+          <Ionicons name="trash-outline" size={20} color={colores.peligro} />
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Rutinas</Text>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <Text style={styles.titulo}>Rutinas</Text>
 
-      <View style={styles.filtrosContainer}>
-        {GRUPOS_FILTRO.map((grupo) => (
+      <FlatList
+        horizontal
+        data={GRUPOS_FILTRO}
+        keyExtractor={(item) => item}
+        showsHorizontalScrollIndicator={false}
+        style={styles.filtrosLista}
+        contentContainerStyle={styles.filtrosContenido}
+        renderItem={({ item: grupo }) => (
           <TouchableOpacity
-            key={grupo}
-            style={[
-              styles.filtroChip,
-              filtroActivo === grupo && styles.filtroChipActivo,
-            ]}
+            style={[styles.filtroEtiqueta, filtroActivo === grupo && styles.filtroEtiquetaActiva]}
             onPress={() => setFiltroActivo(grupo)}
           >
             <Text
@@ -85,16 +112,19 @@ export default function RoutineListScreen() {
               {grupo}
             </Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        )}
+      />
 
       <FlatList
         data={rutinasFiltradas}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={styles.listaContenido}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay rutinas en este filtro.</Text>
+          <View style={styles.vacioContainer}>
+            <Ionicons name="barbell-outline" size={40} color={colores.borde} />
+            <Text style={styles.vacioTexto}>No hay rutinas en este filtro.</Text>
+          </View>
         }
       />
 
@@ -102,100 +132,118 @@ export default function RoutineListScreen() {
         style={styles.fab}
         onPress={() => navigation.navigate('AddRoutineScreen')}
       >
-        <Ionicons name="add" size={30} color="#000" />
+        <Ionicons name="add" size={26} color={colores.fondo} />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', padding: 16 },
-  title: {
-    color: '#00FF41',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  container: { flex: 1, backgroundColor: colores.fondo, paddingHorizontal: espaciado.md },
+  titulo: {
+    color: colores.texto,
+    fontFamily: tipografia.display,
+    fontSize: 34,
+    marginTop: espaciado.md,
+    marginBottom: espaciado.sm,
   },
-  filtrosContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
-  },
-  filtroChip: {
+  filtrosLista: { flexGrow: 0, marginBottom: espaciado.md },
+  filtrosContenido: { gap: espaciado.sm, paddingRight: espaciado.md },
+  filtroEtiqueta: {
     borderWidth: 1,
-    borderColor: '#00FF41',
-    borderRadius: 20,
+    borderColor: colores.borde,
+    borderRadius: radios.chico,
     paddingVertical: 6,
     paddingHorizontal: 14,
+    backgroundColor: colores.superficie,
   },
-  filtroChipActivo: {
-    backgroundColor: '#00FF41',
+  filtroEtiquetaActiva: {
+    backgroundColor: colores.primario,
+    borderColor: colores.primario,
   },
   filtroTexto: {
-    color: '#00FF41',
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpoMedio,
     fontSize: 13,
-    fontWeight: '600',
   },
   filtroTextoActivo: {
-    color: '#000',
+    color: colores.fondo,
   },
-  listContent: { paddingBottom: 100 },
-  emptyText: {
-    color: '#555',
-    textAlign: 'center',
-    marginTop: 40,
+  listaContenido: { paddingBottom: 100 },
+  vacioContainer: { alignItems: 'center', marginTop: 60, gap: espaciado.sm },
+  vacioTexto: {
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpo,
+    fontSize: 14,
   },
-  card: {
+  tarjeta: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: colores.superficie,
+    borderRadius: radios.chico,
+    marginBottom: espaciado.sm,
+    overflow: 'hidden',
+  },
+  franja: {
+    width: 4,
+    backgroundColor: colores.primario,
+  },
+  franjaDestacada: {
+    backgroundColor: colores.destacado,
+  },
+  tarjetaContenido: {
+    flex: 1,
+    paddingVertical: espaciado.sm,
+    paddingHorizontal: espaciado.md,
+  },
+  tarjetaEncabezado: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0D0D0D',
-    borderWidth: 1,
-    borderColor: '#00FF41',
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 12,
+    gap: espaciado.xs,
+    flexWrap: 'wrap',
   },
-  cardInfo: { flex: 1 },
-  cardName: {
-    color: '#00FF41',
-    fontSize: 16,
-    fontWeight: 'bold',
+  nombreRutina: {
+    color: colores.texto,
+    fontFamily: tipografia.cuerpoSemiNegrita,
+    fontSize: 15,
   },
-  cardSubtitle: {
-    color: '#888',
-    fontSize: 13,
-    marginTop: 4,
+  detalleRutina: {
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpo,
+    fontSize: 12,
+    marginTop: 2,
   },
-  cardActions: {
+  etiquetaDestacada: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colores.destacado,
+    borderRadius: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
-  iconButton: {
+  etiquetaDestacadaTexto: {
+    color: colores.fondo,
+    fontFamily: tipografia.cuerpoSemiNegrita,
+    fontSize: 9,
+  },
+  acciones: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: espaciado.sm,
+    gap: espaciado.xs,
+  },
+  botonAccion: {
     padding: 4,
   },
   fab: {
     position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#00FF41',
+    bottom: espaciado.lg,
+    right: espaciado.md,
+    width: 52,
+    height: 52,
+    borderRadius: radios.mediano,
+    backgroundColor: colores.primario,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#00FF41',
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-  },
-  cardDestacada: {
-    borderColor: '#FFD400',
-    borderWidth: 2,
-    shadowColor: '#FFD400',
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
-    elevation: 4,
   },
 });
