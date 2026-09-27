@@ -5,22 +5,22 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoutines } from '../context/RoutineContext';
 
+const GRUPOS_MUSCULARES = ['Pecho', 'Espalda', 'Piernas', 'Brazos', 'Hombros', 'Abdomen'];
+
 export default function AddRoutineScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { addRoutine, updateRoutine, getRoutineById } = useRoutines();
 
-  // Si venimos desde el ícono de "Editar", route.params tendrá un id.
-  // Si venimos desde el botón "+", route.params será undefined.
   const routineId: string | undefined = route.params?.id;
   const isEditMode = !!routineId;
 
@@ -28,35 +28,61 @@ export default function AddRoutineScreen() {
   const [muscleGroup, setMuscleGroup] = useState('');
   const [duration, setDuration] = useState('');
 
-  // El Gran Reto: detectar el id y pre-llenar los inputs en modo edición
+  const [errorNombre, setErrorNombre] = useState('');
+  const [errorGrupo, setErrorGrupo] = useState('');
+  const [errorDuracion, setErrorDuracion] = useState('');
+
   useEffect(() => {
     if (routineId) {
-      const existingRoutine = getRoutineById(routineId);
-      if (existingRoutine) {
-        setName(existingRoutine.name);
-        setMuscleGroup(existingRoutine.muscleGroup);
-        setDuration(existingRoutine.duration.toString());
+      const rutinaExistente = getRoutineById(routineId);
+      if (rutinaExistente) {
+        setName(rutinaExistente.name);
+        setMuscleGroup(rutinaExistente.muscleGroup);
+        setDuration(rutinaExistente.duration.toString());
       }
     }
   }, [routineId]);
 
-  const handleSave = () => {
-    // Validación de campos vacíos
-    if (!name.trim() || !muscleGroup.trim() || !duration.trim()) {
-      Alert.alert('Campos incompletos', 'Por favor llena todos los campos.');
-      return;
+  const validarFormulario = () => {
+    let esValido = true;
+
+    if (!name.trim()) {
+      setErrorNombre('El nombre es obligatorio.');
+      esValido = false;
+    } else {
+      setErrorNombre('');
     }
 
-    const parsedDuration = parseFloat(duration);
-    if (isNaN(parsedDuration)) {
-      Alert.alert('Duración inválida', 'La duración debe ser un número.');
+    if (!muscleGroup.trim()) {
+      setErrorGrupo('Selecciona un grupo muscular.');
+      esValido = false;
+    } else {
+      setErrorGrupo('');
+    }
+
+    const duracionNumerica = parseFloat(duration);
+    if (!duration.trim() || isNaN(duracionNumerica)) {
+      setErrorDuracion('La duración debe ser un número.');
+      esValido = false;
+    } else if (duracionNumerica < 10 || duracionNumerica > 180) {
+      setErrorDuracion('La duración debe estar entre 10 y 180 minutos.');
+      esValido = false;
+    } else {
+      setErrorDuracion('');
+    }
+
+    return esValido;
+  };
+
+  const handleSave = () => {
+    if (!validarFormulario()) {
       return;
     }
 
     const data = {
       name: name.trim(),
       muscleGroup: muscleGroup.trim(),
-      duration: parsedDuration,
+      duration: parseFloat(duration),
     };
 
     if (isEditMode && routineId) {
@@ -74,49 +100,68 @@ export default function AddRoutineScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        <View style={styles.header}>
-          <Ionicons
-            name={isEditMode ? 'pencil-outline' : 'add-circle-outline'}
-            size={40}
-            color="#00FF41"
+        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+          <View style={styles.header}>
+            <Ionicons
+              name={isEditMode ? 'pencil-outline' : 'add-circle-outline'}
+              size={40}
+              color="#00FF41"
+            />
+            <Text style={styles.title}>
+              {isEditMode ? 'Editar Rutina' : 'Nueva Rutina'}
+            </Text>
+          </View>
+
+          <Text style={styles.label}>Nombre</Text>
+          <TextInput
+            style={[styles.input, errorNombre ? styles.inputError : null]}
+            value={name}
+            onChangeText={setName}
+            placeholder="Ej: Pecho y Tríceps"
+            placeholderTextColor="#555"
           />
-          <Text style={styles.title}>
-            {isEditMode ? 'Editar Rutina' : 'Nueva Rutina'}
-          </Text>
-        </View>
+          {errorNombre ? <Text style={styles.errorText}>{errorNombre}</Text> : null}
 
-        <Text style={styles.label}>Nombre</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="Ej: Pecho y Tríceps"
-          placeholderTextColor="#555"
-        />
+          <Text style={styles.label}>Grupo Muscular</Text>
+          <View style={styles.gruposContainer}>
+            {GRUPOS_MUSCULARES.map((grupo) => (
+              <TouchableOpacity
+                key={grupo}
+                style={[
+                  styles.grupoChip,
+                  muscleGroup === grupo && styles.grupoChipActivo,
+                ]}
+                onPress={() => setMuscleGroup(grupo)}
+              >
+                <Text
+                  style={[
+                    styles.grupoTexto,
+                    muscleGroup === grupo && styles.grupoTextoActivo,
+                  ]}
+                >
+                  {grupo}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {errorGrupo ? <Text style={styles.errorText}>{errorGrupo}</Text> : null}
 
-        <Text style={styles.label}>Grupo Muscular</Text>
-        <TextInput
-          style={styles.input}
-          value={muscleGroup}
-          onChangeText={setMuscleGroup}
-          placeholder="Ej: Pecho"
-          placeholderTextColor="#555"
-        />
+          <Text style={styles.label}>Duración (minutos)</Text>
+          <TextInput
+            style={[styles.input, errorDuracion ? styles.inputError : null]}
+            value={duration}
+            onChangeText={setDuration}
+            placeholder="Ej: 45"
+            placeholderTextColor="#555"
+            keyboardType="numeric"
+          />
+          {errorDuracion ? <Text style={styles.errorText}>{errorDuracion}</Text> : null}
 
-        <Text style={styles.label}>Duración (minutos)</Text>
-        <TextInput
-          style={styles.input}
-          value={duration}
-          onChangeText={setDuration}
-          placeholder="Ej: 45"
-          placeholderTextColor="#555"
-          keyboardType="numeric"
-        />
-
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Ionicons name="save-outline" size={20} color="#000" />
-          <Text style={styles.saveButtonText}>Guardar</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Ionicons name="save-outline" size={20} color="#000" />
+            <Text style={styles.saveButtonText}>Guardar</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -148,6 +193,37 @@ const styles = StyleSheet.create({
     padding: 12,
     color: '#fff',
     fontSize: 15,
+  },
+  inputError: {
+    borderColor: '#FF3B3B',
+  },
+  errorText: {
+    color: '#FF3B3B',
+    fontSize: 12,
+    marginTop: 6,
+  },
+  gruposContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  grupoChip: {
+    borderWidth: 1,
+    borderColor: '#00FF41',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  grupoChipActivo: {
+    backgroundColor: '#00FF41',
+  },
+  grupoTexto: {
+    color: '#00FF41',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  grupoTextoActivo: {
+    color: '#000',
   },
   saveButton: {
     flexDirection: 'row',

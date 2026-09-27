@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoutines, Routine } from '../context/RoutineContext';
 
+const GRUPOS_FILTRO = ['Todos', 'Pecho', 'Espalda', 'Piernas', 'Brazos', 'Hombros', 'Abdomen'];
+
 export default function RoutineListScreen() {
   const navigation = useNavigation<any>();
   const { routines, deleteRoutine } = useRoutines();
+  const [filtroActivo, setFiltroActivo] = useState('Todos');
+
+  const rutinasFiltradas = useMemo(() => {
+    if (filtroActivo === 'Todos') return routines;
+    return routines.filter((rutina) => rutina.muscleGroup === filtroActivo);
+  }, [routines, filtroActivo]);
 
   const renderItem = ({ item }: { item: Routine }) => (
     <View style={styles.card}>
@@ -47,13 +55,35 @@ export default function RoutineListScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Rutinas</Text>
 
+      <View style={styles.filtrosContainer}>
+        {GRUPOS_FILTRO.map((grupo) => (
+          <TouchableOpacity
+            key={grupo}
+            style={[
+              styles.filtroChip,
+              filtroActivo === grupo && styles.filtroChipActivo,
+            ]}
+            onPress={() => setFiltroActivo(grupo)}
+          >
+            <Text
+              style={[
+                styles.filtroTexto,
+                filtroActivo === grupo && styles.filtroTextoActivo,
+              ]}
+            >
+              {grupo}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
-        data={routines}
+        data={rutinasFiltradas}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No hay rutinas aún. ¡Crea una!</Text>
+          <Text style={styles.emptyText}>No hay rutinas en este filtro.</Text>
         }
       />
 
@@ -74,6 +104,30 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+  },
+  filtrosContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  filtroChip: {
+    borderWidth: 1,
+    borderColor: '#00FF41',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  filtroChipActivo: {
+    backgroundColor: '#00FF41',
+  },
+  filtroTexto: {
+    color: '#00FF41',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  filtroTextoActivo: {
+    color: '#000',
   },
   listContent: { paddingBottom: 100 },
   emptyText: {
