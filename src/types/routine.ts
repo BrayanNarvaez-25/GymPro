@@ -4,4 +4,5 @@ export type Routine = {
   muscleGroup: string;
   duration: number;
   createdAt: string;
+  featured: boolean;
 };

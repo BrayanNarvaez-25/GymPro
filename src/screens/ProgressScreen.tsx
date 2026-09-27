@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRoutines } from '../context/RoutineContext';
 
 export default function ProgressScreen() {
-  const { routines } = useRoutines();
+  const { routines, rutinaDestacada } = useRoutines();
 
   const estadisticas = useMemo(() => {
     const totalRutinas = routines.length;
@@ -39,33 +39,48 @@ export default function ProgressScreen() {
             Aún no hay rutinas registradas. Crea una para ver tu progreso.
           </Text>
         ) : (
-          <View style={styles.tarjetasContainer}>
-            <View style={styles.tarjeta}>
-              <Ionicons name="list-outline" size={28} color="#00FF41" />
-              <Text style={styles.valorTarjeta}>{estadisticas.totalRutinas}</Text>
-              <Text style={styles.etiquetaTarjeta}>Total de rutinas</Text>
+          <>
+            <View style={styles.tarjetasContainer}>
+              <View style={styles.tarjeta}>
+                <Ionicons name="list-outline" size={28} color="#00FF41" />
+                <Text style={styles.valorTarjeta}>{estadisticas.totalRutinas}</Text>
+                <Text style={styles.etiquetaTarjeta}>Total de rutinas</Text>
+              </View>
+
+              <View style={styles.tarjeta}>
+                <Ionicons name="time-outline" size={28} color="#00FF41" />
+                <Text style={styles.valorTarjeta}>{estadisticas.duracionTotal} min</Text>
+                <Text style={styles.etiquetaTarjeta}>Duración total</Text>
+              </View>
+
+              <View style={styles.tarjeta}>
+                <Ionicons name="speedometer-outline" size={28} color="#00FF41" />
+                <Text style={styles.valorTarjeta}>
+                  {estadisticas.duracionPromedio.toFixed(1)} min
+                </Text>
+                <Text style={styles.etiquetaTarjeta}>Duración promedio</Text>
+              </View>
+
+              <View style={styles.tarjeta}>
+                <Ionicons name="trophy-outline" size={28} color="#00FF41" />
+                <Text style={styles.valorTarjeta}>{estadisticas.grupoTop}</Text>
+                <Text style={styles.etiquetaTarjeta}>Grupo más entrenado</Text>
+              </View>
             </View>
 
-            <View style={styles.tarjeta}>
-              <Ionicons name="time-outline" size={28} color="#00FF41" />
-              <Text style={styles.valorTarjeta}>{estadisticas.duracionTotal} min</Text>
-              <Text style={styles.etiquetaTarjeta}>Duración total</Text>
-            </View>
-
-            <View style={styles.tarjeta}>
-              <Ionicons name="speedometer-outline" size={28} color="#00FF41" />
-              <Text style={styles.valorTarjeta}>
-                {estadisticas.duracionPromedio.toFixed(1)} min
-              </Text>
-              <Text style={styles.etiquetaTarjeta}>Duración promedio</Text>
-            </View>
-
-            <View style={styles.tarjeta}>
-              <Ionicons name="trophy-outline" size={28} color="#00FF41" />
-              <Text style={styles.valorTarjeta}>{estadisticas.grupoTop}</Text>
-              <Text style={styles.etiquetaTarjeta}>Grupo más entrenado</Text>
-            </View>
-          </View>
+            {rutinaDestacada && (
+              <View style={styles.destacadaContainer}>
+                <Ionicons name="star" size={24} color="#FFD400" />
+                <View style={{ marginLeft: 10 }}>
+                  <Text style={styles.destacadaTitulo}>Rutina destacada</Text>
+                  <Text style={styles.destacadaNombre}>{rutinaDestacada.name}</Text>
+                  <Text style={styles.destacadaSubtitulo}>
+                    {rutinaDestacada.muscleGroup} • {rutinaDestacada.duration} min
+                  </Text>
+                </View>
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -112,5 +127,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     textAlign: 'center',
+  },
+  destacadaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0D0D0D',
+    borderWidth: 1,
+    borderColor: '#FFD400',
+    borderRadius: 10,
+    padding: 16,
+    marginTop: 20,
+  },
+  destacadaTitulo: {
+    color: '#FFD400',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  destacadaNombre: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
+  destacadaSubtitulo: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 2,
   },
 });

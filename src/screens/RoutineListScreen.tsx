@@ -9,7 +9,7 @@ const GRUPOS_FILTRO = ['Todos', 'Pecho', 'Espalda', 'Piernas', 'Brazos', 'Hombro
 
 export default function RoutineListScreen() {
   const navigation = useNavigation<any>();
-  const { routines, deleteRoutine } = useRoutines();
+  const { routines, deleteRoutine, marcarComoDestacada } = useRoutines();
   const [filtroActivo, setFiltroActivo] = useState('Todos');
 
   const rutinasFiltradas = useMemo(() => {
@@ -18,7 +18,7 @@ export default function RoutineListScreen() {
   }, [routines, filtroActivo]);
 
   const renderItem = ({ item }: { item: Routine }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, item.featured && styles.cardDestacada]}>
       <View style={styles.cardInfo}>
         <Text style={styles.cardName}>{item.name}</Text>
         <Text style={styles.cardSubtitle}>
@@ -32,6 +32,17 @@ export default function RoutineListScreen() {
           onPress={() => navigation.navigate('RoutineDetailScreen', { id: item.id })}
         >
           <Ionicons name="eye-outline" size={22} color="#00FF41" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => marcarComoDestacada(item.id)}
+        >
+          <Ionicons
+            name={item.featured ? 'star' : 'star-outline'}
+            size={22}
+            color="#FFD400"
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -178,5 +189,13 @@ const styles = StyleSheet.create({
     shadowColor: '#00FF41',
     shadowOpacity: 0.6,
     shadowRadius: 8,
+  },
+  cardDestacada: {
+    borderColor: '#FFD400',
+    borderWidth: 2,
+    shadowColor: '#FFD400',
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 4,
   },
 });

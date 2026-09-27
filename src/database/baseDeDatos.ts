@@ -14,24 +14,41 @@ export async function abrirBaseDeDatos() {
       name TEXT NOT NULL,
       muscleGroup TEXT NOT NULL,
       duration REAL NOT NULL,
-      createdAt TEXT NOT NULL
+      createdAt TEXT NOT NULL,
+      featured INTEGER NOT NULL DEFAULT 0
     );
   `);
+
+  try {
+    await baseDatos.execAsync('ALTER TABLE rutinas ADD COLUMN featured INTEGER NOT NULL DEFAULT 0;');
+  } catch (error) {
+  }
 
   return baseDatos;
 }
 
+function convertirFilaARutina(fila: any): Routine {
+  return {
+    id: fila.id,
+    name: fila.name,
+    muscleGroup: fila.muscleGroup,
+    duration: fila.duration,
+    createdAt: fila.createdAt,
+    featured: fila.featured === 1,
+  };
+}
+
 export async function obtenerRutinasDesdeBD(): Promise<Routine[]> {
   const bd = await abrirBaseDeDatos();
-  const filas = await bd.getAllAsync<Routine>('SELECT * FROM rutinas ORDER BY createdAt DESC;');
-  return filas;
+  const filas = await bd.getAllAsync<any>('SELECT * FROM rutinas ORDER BY createdAt DESC;');
+  return filas.map(convertirFilaARutina);
 }
 
 export async function insertarRutinaEnBD(rutina: Routine) {
   const bd = await abrirBaseDeDatos();
   await bd.runAsync(
-    'INSERT INTO rutinas (id, name, muscleGroup, duration, createdAt) VALUES (?, ?, ?, ?, ?);',
-    [rutina.id, rutina.name, rutina.muscleGroup, rutina.duration, rutina.createdAt]
+    'INSERT INTO rutinas (id, name, muscleGroup, duration, createdAt, featured) VALUES (?, ?, ?, ?, ?, ?);',
+    [rutina.id, rutina.name, rutina.muscleGroup, rutina.duration, rutina.createdAt, rutina.featured ? 1 : 0]
   );
 }
 
@@ -46,4 +63,14 @@ export async function actualizarRutinaEnBD(rutina: Routine) {
 export async function eliminarRutinaDeBD(id: string) {
   const bd = await abrirBaseDeDatos();
   await bd.runAsync('DELETE FROM rutinas WHERE id = ?;', [id]);
+}
+
+export async function quitarDestacadaDeTodasEnBD() {
+  const bd = await abrirBaseDeDatos();
+  await bd.runAsync('UPDATE rutinas SET featured = 0;');
+}
+
+export async function marcarDestacadaEnBD(id: string) {
+  const bd = await abrirBaseDeDatos();
+  await bd.runAsync('UPDATE rutinas SET featured = 1 WHERE id = ?;', [id]);
 }

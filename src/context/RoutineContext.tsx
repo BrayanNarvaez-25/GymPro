@@ -6,6 +6,8 @@ import {
   insertarRutinaEnBD,
   actualizarRutinaEnBD,
   eliminarRutinaDeBD,
+  quitarDestacadaDeTodasEnBD,
+  marcarDestacadaEnBD,
 } from '../database/baseDeDatos';
 
 export type { Routine };
@@ -13,10 +15,12 @@ export type { Routine };
 type RoutineContextType = {
   routines: Routine[];
   cargando: boolean;
-  addRoutine: (data: Omit<Routine, 'id' | 'createdAt'>) => void;
-  updateRoutine: (id: string, data: Omit<Routine, 'id' | 'createdAt'>) => void;
+  addRoutine: (data: Omit<Routine, 'id' | 'createdAt' | 'featured'>) => void;
+  updateRoutine: (id: string, data: Omit<Routine, 'id' | 'createdAt' | 'featured'>) => void;
   deleteRoutine: (id: string) => void;
   getRoutineById: (id: string) => Routine | undefined;
+  marcarComoDestacada: (id: string) => void;
+  rutinaDestacada: Routine | undefined;
 };
 
 const RoutineContext = createContext<RoutineContextType | undefined>(undefined);
@@ -35,17 +39,18 @@ export function RoutineProvider({ children }: { children: ReactNode }) {
     cargarDatos();
   }, []);
 
-  const addRoutine = (data: Omit<Routine, 'id' | 'createdAt'>) => {
+  const addRoutine = (data: Omit<Routine, 'id' | 'createdAt' | 'featured'>) => {
     const nuevaRutina: Routine = {
       ...data,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
+      featured: false,
     };
     setRoutines((prev) => [nuevaRutina, ...prev]);
     insertarRutinaEnBD(nuevaRutina);
   };
 
-  const updateRoutine = (id: string, data: Omit<Routine, 'id' | 'createdAt'>) => {
+  const updateRoutine = (id: string, data: Omit<Routine, 'id' | 'createdAt' | 'featured'>) => {
     setRoutines((prev) =>
       prev.map((rutina) => (rutina.id === id ? { ...rutina, ...data } : rutina))
     );
@@ -64,9 +69,27 @@ export function RoutineProvider({ children }: { children: ReactNode }) {
     return routines.find((rutina) => rutina.id === id);
   };
 
+  const marcarComoDestacada = (id: string) => {
+    setRoutines((prev) =>
+      prev.map((rutina) => ({ ...rutina, featured: rutina.id === id }))
+    );
+    quitarDestacadaDeTodasEnBD().then(() => marcarDestacadaEnBD(id));
+  };
+
+  const rutinaDestacada = routines.find((rutina) => rutina.featured);
+
   return (
     <RoutineContext.Provider
-      value={{ routines, cargando, addRoutine, updateRoutine, deleteRoutine, getRoutineById }}
+      value={{
+        routines,
+        cargando,
+        addRoutine,
+        updateRoutine,
+        deleteRoutine,
+        getRoutineById,
+        marcarComoDestacada,
+        rutinaDestacada,
+      }}
     >
       {children}
     </RoutineContext.Provider>
