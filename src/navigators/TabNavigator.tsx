@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import ProgressScreen from '../screens/ProgressScreen';
 import RoutineListScreen from '../screens/RoutineListScreen';
+import { colores } from '../theme/tema';
 
 const Tab = createBottomTabNavigator();
 
@@ -11,9 +12,10 @@ export default function TabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#0D0D0D' },
-        tabBarActiveTintColor: '#00FF41',
-        tabBarInactiveTintColor: '#555',
+        tabBarStyle: { backgroundColor: colores.superficie, borderTopColor: colores.borde },
+        tabBarActiveTintColor: colores.primario,
+        tabBarInactiveTintColor: colores.textoSecundario,
+        tabBarLabelStyle: { fontFamily: 'Inter_500Medium', fontSize: 11 },
       }}
     >
       <Tab.Screen

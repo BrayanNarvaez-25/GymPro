@@ -3,6 +3,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import TabNavigator from './TabNavigator';
 import SettingsScreen from '../screens/SettingsScreen';
+import { colores } from '../theme/tema';
 
 const Drawer = createDrawerNavigator();
 
@@ -10,11 +11,13 @@ export default function DrawerNavigator() {
   return (
     <Drawer.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#0D0D0D' },
-        headerTintColor: '#00FF41',
-        drawerStyle: { backgroundColor: '#000' },
-        drawerActiveTintColor: '#00FF41',
-        drawerInactiveTintColor: '#888',
+        headerStyle: { backgroundColor: colores.superficie },
+        headerTintColor: colores.primario,
+        headerTitleStyle: { fontFamily: 'Inter_600SemiBold' },
+        drawerStyle: { backgroundColor: colores.fondo },
+        drawerActiveTintColor: colores.primario,
+        drawerInactiveTintColor: colores.textoSecundario,
+        drawerLabelStyle: { fontFamily: 'Inter_500Medium' },
       }}
     >
       <Drawer.Screen
