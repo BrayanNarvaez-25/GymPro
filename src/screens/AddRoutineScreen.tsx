@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoutines } from '../context/RoutineContext';
+import { colores, tipografia, radios, espaciado } from '../theme/tema';
 
 const GRUPOS_MUSCULARES = ['Pecho', 'Espalda', 'Piernas', 'Brazos', 'Hombros', 'Abdomen'];
 
@@ -95,19 +96,21 @@ export default function AddRoutineScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={styles.scrollContenido}>
           <View style={styles.header}>
-            <Ionicons
-              name={isEditMode ? 'pencil-outline' : 'add-circle-outline'}
-              size={40}
-              color="#00FF41"
-            />
-            <Text style={styles.title}>
+            <View style={styles.headerIcono}>
+              <Ionicons
+                name={isEditMode ? 'pencil-outline' : 'add-outline'}
+                size={28}
+                color={colores.fondo}
+              />
+            </View>
+            <Text style={styles.titulo}>
               {isEditMode ? 'Editar Rutina' : 'Nueva Rutina'}
             </Text>
           </View>
@@ -118,33 +121,25 @@ export default function AddRoutineScreen() {
             value={name}
             onChangeText={setName}
             placeholder="Ej: Pecho y Tríceps"
-            placeholderTextColor="#555"
+            placeholderTextColor={colores.textoSecundario}
           />
-          {errorNombre ? <Text style={styles.errorText}>{errorNombre}</Text> : null}
+          {errorNombre ? <Text style={styles.errorTexto}>{errorNombre}</Text> : null}
 
           <Text style={styles.label}>Grupo Muscular</Text>
-          <View style={styles.gruposContainer}>
+          <View style={styles.chipsContainer}>
             {GRUPOS_MUSCULARES.map((grupo) => (
               <TouchableOpacity
                 key={grupo}
-                style={[
-                  styles.grupoChip,
-                  muscleGroup === grupo && styles.grupoChipActivo,
-                ]}
+                style={[styles.chip, muscleGroup === grupo && styles.chipActivo]}
                 onPress={() => setMuscleGroup(grupo)}
               >
-                <Text
-                  style={[
-                    styles.grupoTexto,
-                    muscleGroup === grupo && styles.grupoTextoActivo,
-                  ]}
-                >
+                <Text style={[styles.chipTexto, muscleGroup === grupo && styles.chipTextoActivo]}>
                   {grupo}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
-          {errorGrupo ? <Text style={styles.errorText}>{errorGrupo}</Text> : null}
+          {errorGrupo ? <Text style={styles.errorTexto}>{errorGrupo}</Text> : null}
 
           <Text style={styles.label}>Duración (minutos)</Text>
           <TextInput
@@ -152,14 +147,14 @@ export default function AddRoutineScreen() {
             value={duration}
             onChangeText={setDuration}
             placeholder="Ej: 45"
-            placeholderTextColor="#555"
+            placeholderTextColor={colores.textoSecundario}
             keyboardType="numeric"
           />
-          {errorDuracion ? <Text style={styles.errorText}>{errorDuracion}</Text> : null}
+          {errorDuracion ? <Text style={styles.errorTexto}>{errorDuracion}</Text> : null}
 
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Ionicons name="save-outline" size={20} color="#000" />
-            <Text style={styles.saveButtonText}>Guardar</Text>
+          <TouchableOpacity style={styles.botonGuardar} onPress={handleSave}>
+            <Ionicons name="checkmark" size={20} color={colores.fondo} />
+            <Text style={styles.botonGuardarTexto}>Guardar</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -168,76 +163,91 @@ export default function AddRoutineScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', padding: 20 },
+  container: { flex: 1, backgroundColor: colores.fondo },
+  scrollContenido: { padding: espaciado.md, paddingBottom: espaciado.xl },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    gap: espaciado.sm,
+    marginBottom: espaciado.lg,
   },
-  title: {
-    color: '#00FF41',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 8,
+  headerIcono: {
+    width: 44,
+    height: 44,
+    borderRadius: radios.mediano,
+    backgroundColor: colores.primario,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titulo: {
+    color: colores.texto,
+    fontFamily: tipografia.display,
+    fontSize: 26,
   },
   label: {
-    color: '#00FF41',
-    fontSize: 14,
-    marginBottom: 6,
-    marginTop: 14,
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpoMedio,
+    fontSize: 13,
+    marginBottom: espaciado.xs,
+    marginTop: espaciado.md,
   },
   input: {
-    backgroundColor: '#0D0D0D',
+    backgroundColor: colores.superficie,
     borderWidth: 1,
-    borderColor: '#00FF41',
-    borderRadius: 6,
+    borderColor: colores.borde,
+    borderRadius: radios.chico,
     padding: 12,
-    color: '#fff',
+    color: colores.texto,
+    fontFamily: tipografia.cuerpo,
     fontSize: 15,
   },
   inputError: {
-    borderColor: '#FF3B3B',
+    borderColor: colores.peligro,
   },
-  errorText: {
-    color: '#FF3B3B',
+  errorTexto: {
+    color: colores.peligro,
+    fontFamily: tipografia.cuerpo,
     fontSize: 12,
     marginTop: 6,
   },
-  gruposContainer: {
+  chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: espaciado.xs,
   },
-  grupoChip: {
+  chip: {
     borderWidth: 1,
-    borderColor: '#00FF41',
-    borderRadius: 20,
-    paddingVertical: 6,
+    borderColor: colores.borde,
+    borderRadius: radios.chico,
+    paddingVertical: 8,
     paddingHorizontal: 14,
+    backgroundColor: colores.superficie,
   },
-  grupoChipActivo: {
-    backgroundColor: '#00FF41',
+  chipActivo: {
+    backgroundColor: colores.primario,
+    borderColor: colores.primario,
   },
-  grupoTexto: {
-    color: '#00FF41',
+  chipTexto: {
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpoMedio,
     fontSize: 13,
-    fontWeight: '600',
   },
-  grupoTextoActivo: {
-    color: '#000',
+  chipTextoActivo: {
+    color: colores.fondo,
   },
-  saveButton: {
+  botonGuardar: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#00FF41',
+    gap: espaciado.xs,
+    backgroundColor: colores.primario,
     padding: 14,
-    borderRadius: 6,
-    marginTop: 30,
+    borderRadius: radios.chico,
+    marginTop: espaciado.lg,
   },
-  saveButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
+  botonGuardarTexto: {
+    color: colores.fondo,
+    fontFamily: tipografia.cuerpoSemiNegrita,
+    fontSize: 15,
   },
 });
