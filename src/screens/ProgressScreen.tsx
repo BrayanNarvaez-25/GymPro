@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoutines } from '../context/RoutineContext';
+import { colores, tipografia, radios, espaciado } from '../theme/tema';
 
 export default function ProgressScreen() {
   const { routines, rutinaDestacada } = useRoutines();
@@ -30,52 +31,58 @@ export default function ProgressScreen() {
   }, [routines]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.contenido}>
         <Text style={styles.titulo}>Progreso</Text>
 
         {routines.length === 0 ? (
-          <Text style={styles.vacioTexto}>
-            Aún no hay rutinas registradas. Crea una para ver tu progreso.
-          </Text>
+          <View style={styles.vacioContainer}>
+            <Ionicons name="stats-chart-outline" size={40} color={colores.borde} />
+            <Text style={styles.vacioTexto}>
+              Aún no hay rutinas registradas. Crea una para ver tu progreso.
+            </Text>
+          </View>
         ) : (
           <>
-            <View style={styles.tarjetasContainer}>
-              <View style={styles.tarjeta}>
-                <Ionicons name="list-outline" size={28} color="#00FF41" />
-                <Text style={styles.valorTarjeta}>{estadisticas.totalRutinas}</Text>
-                <Text style={styles.etiquetaTarjeta}>Total de rutinas</Text>
+            <View style={styles.marcador}>
+              <View style={styles.marcadorFila}>
+                <View style={styles.marcadorCelda}>
+                  <Text style={styles.marcadorValor}>{estadisticas.totalRutinas}</Text>
+                  <Text style={styles.marcadorEtiqueta}>Rutinas</Text>
+                </View>
+                <View style={styles.divisorVertical} />
+                <View style={styles.marcadorCelda}>
+                  <Text style={styles.marcadorValor}>{estadisticas.duracionTotal}</Text>
+                  <Text style={styles.marcadorEtiqueta}>Min. totales</Text>
+                </View>
               </View>
 
-              <View style={styles.tarjeta}>
-                <Ionicons name="time-outline" size={28} color="#00FF41" />
-                <Text style={styles.valorTarjeta}>{estadisticas.duracionTotal} min</Text>
-                <Text style={styles.etiquetaTarjeta}>Duración total</Text>
-              </View>
+              <View style={styles.divisorHorizontal} />
 
-              <View style={styles.tarjeta}>
-                <Ionicons name="speedometer-outline" size={28} color="#00FF41" />
-                <Text style={styles.valorTarjeta}>
-                  {estadisticas.duracionPromedio.toFixed(1)} min
-                </Text>
-                <Text style={styles.etiquetaTarjeta}>Duración promedio</Text>
-              </View>
-
-              <View style={styles.tarjeta}>
-                <Ionicons name="trophy-outline" size={28} color="#00FF41" />
-                <Text style={styles.valorTarjeta}>{estadisticas.grupoTop}</Text>
-                <Text style={styles.etiquetaTarjeta}>Grupo más entrenado</Text>
+              <View style={styles.marcadorFila}>
+                <View style={styles.marcadorCelda}>
+                  <Text style={styles.marcadorValor}>{estadisticas.duracionPromedio.toFixed(1)}</Text>
+                  <Text style={styles.marcadorEtiqueta}>Promedio</Text>
+                </View>
+                <View style={styles.divisorVertical} />
+                <View style={styles.marcadorCelda}>
+                  <Text style={styles.marcadorValorChico}>{estadisticas.grupoTop}</Text>
+                  <Text style={styles.marcadorEtiqueta}>Más entrenado</Text>
+                </View>
               </View>
             </View>
 
             {rutinaDestacada && (
               <View style={styles.destacadaContainer}>
-                <Ionicons name="star" size={24} color="#FFD400" />
-                <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.destacadaTitulo}>Rutina destacada</Text>
+                <View style={styles.destacadaFranja} />
+                <View style={styles.destacadaContenido}>
+                  <View style={styles.destacadaEncabezado}>
+                    <Ionicons name="star" size={16} color={colores.destacado} />
+                    <Text style={styles.destacadaTitulo}>Rutina destacada</Text>
+                  </View>
                   <Text style={styles.destacadaNombre}>{rutinaDestacada.name}</Text>
                   <Text style={styles.destacadaSubtitulo}>
-                    {rutinaDestacada.muscleGroup} • {rutinaDestacada.duration} min
+                    {rutinaDestacada.muscleGroup} · {rutinaDestacada.duration} min
                   </Text>
                 </View>
               </View>
@@ -88,69 +95,95 @@ export default function ProgressScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  contenido: { padding: 20 },
+  container: { flex: 1, backgroundColor: colores.fondo },
+  contenido: { padding: espaciado.md, paddingBottom: espaciado.xl },
   titulo: {
-    color: '#00FF41',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    color: colores.texto,
+    fontFamily: tipografia.display,
+    fontSize: 34,
+    marginBottom: espaciado.md,
   },
+  vacioContainer: { alignItems: 'center', marginTop: 60, gap: espaciado.sm },
   vacioTexto: {
-    color: '#555',
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpo,
+    fontSize: 14,
     textAlign: 'center',
-    marginTop: 40,
   },
-  tarjetasContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'space-between',
-  },
-  tarjeta: {
-    width: '47%',
-    backgroundColor: '#0D0D0D',
+  marcador: {
+    backgroundColor: colores.superficie,
+    borderRadius: radios.mediano,
     borderWidth: 1,
-    borderColor: '#00FF41',
-    borderRadius: 10,
-    padding: 16,
+    borderColor: colores.borde,
+    overflow: 'hidden',
+  },
+  marcadorFila: {
+    flexDirection: 'row',
+  },
+  marcadorCelda: {
+    flex: 1,
     alignItems: 'center',
+    paddingVertical: espaciado.lg,
   },
-  valorTarjeta: {
-    color: '#00FF41',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 8,
+  marcadorValor: {
+    color: colores.primario,
+    fontFamily: tipografia.display,
+    fontSize: 40,
   },
-  etiquetaTarjeta: {
-    color: '#888',
+  marcadorValorChico: {
+    color: colores.primario,
+    fontFamily: tipografia.display,
+    fontSize: 24,
+    marginTop: 4,
+  },
+  marcadorEtiqueta: {
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpoMedio,
     fontSize: 12,
     marginTop: 4,
-    textAlign: 'center',
+  },
+  divisorVertical: {
+    width: 1,
+    backgroundColor: colores.borde,
+  },
+  divisorHorizontal: {
+    height: 1,
+    backgroundColor: colores.borde,
   },
   destacadaContainer: {
     flexDirection: 'row',
+    backgroundColor: colores.superficie,
+    borderRadius: radios.chico,
+    marginTop: espaciado.md,
+    overflow: 'hidden',
+  },
+  destacadaFranja: {
+    width: 4,
+    backgroundColor: colores.destacado,
+  },
+  destacadaContenido: {
+    flex: 1,
+    padding: espaciado.md,
+  },
+  destacadaEncabezado: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0D0D0D',
-    borderWidth: 1,
-    borderColor: '#FFD400',
-    borderRadius: 10,
-    padding: 16,
-    marginTop: 20,
+    gap: 6,
   },
   destacadaTitulo: {
-    color: '#FFD400',
+    color: colores.destacado,
+    fontFamily: tipografia.cuerpoMedio,
     fontSize: 12,
-    fontWeight: '600',
   },
   destacadaNombre: {
-    color: '#fff',
+    color: colores.texto,
+    fontFamily: tipografia.cuerpoSemiNegrita,
     fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 2,
+    marginTop: 4,
   },
   destacadaSubtitulo: {
-    color: '#888',
+    color: colores.textoSecundario,
+    fontFamily: tipografia.cuerpo,
     fontSize: 12,
     marginTop: 2,
   },
